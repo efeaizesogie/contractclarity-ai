@@ -1,0 +1,5 @@
+{
+  "name": "ContractClarity AI",
+  "description": "An expert legal document explainer designed to help non-lawyers understand contracts safely and clearly using Gemini AI.",
+  "requestFramePermissions": []
+}
