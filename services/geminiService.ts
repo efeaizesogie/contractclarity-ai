@@ -18,6 +18,7 @@ export const analyzeContract = async (
     You are NOT a lawyer and do not give legal advice. Your role is to simplify and highlight risks.
     
     CRITICAL INSTRUCTIONS:
+    - Use Google Search to cross-reference the clauses with current legal standards, common industry practices, and recent relevant court cases or regulatory updates.
     - Break the contract into logical clauses.
     - Explain each in plain English (12-year-old level).
     - Detect "Red Flags" like hidden penalties, one-sided obligations, and unfair termination.
@@ -32,14 +33,15 @@ export const analyzeContract = async (
   let attempt = 0;
   while (attempt < MAX_RETRIES) {
     try {
-      if (onStatusUpdate) onStatusUpdate(`Analyzing clauses (Attempt ${attempt + 1})...`);
+      if (onStatusUpdate) onStatusUpdate(`Grounding with legal search (Attempt ${attempt + 1})...`);
       
       const response = await ai.models.generateContent({
         model: "gemini-3-pro-preview",
-        contents: [{ parts: [{ text: `Analyze this contract:\n\n${text}` }] }],
+        contents: [{ parts: [{ text: `Analyze this contract using current legal standards and industry norms found via search:\n\n${text}` }] }],
         config: {
           systemInstruction,
           responseMimeType: "application/json",
+          tools: [{ googleSearch: {} }],
           responseSchema: {
             type: Type.OBJECT,
             properties: {
@@ -91,7 +93,20 @@ export const analyzeContract = async (
       const resultText = response.text;
       if (!resultText) throw new Error("Empty response from AI");
 
-      return JSON.parse(resultText) as AnalysisResult;
+      const result = JSON.parse(resultText) as AnalysisResult;
+
+      // Extract grounding sources
+      const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+      if (groundingChunks) {
+        result.sources = groundingChunks
+          .filter((chunk: any) => chunk.web && chunk.web.uri)
+          .map((chunk: any) => ({
+            uri: chunk.web.uri,
+            title: chunk.web.title || chunk.web.uri
+          }));
+      }
+
+      return result;
 
     } catch (error: any) {
       console.error(`Attempt ${attempt + 1} failed:`, error);

@@ -26,6 +26,7 @@ export interface AnalysisResult {
     plainVerdict: string;
   };
   checklist: string[];
+  sources?: { uri: string; title: string }[];
 }
 
 export interface ContractFile {

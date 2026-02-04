@@ -21,6 +21,19 @@ const App: React.FC = () => {
   const handleBackToStart = () => {
     setAnalysis(null);
     setView('landing');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavToSection = (sectionId: string) => {
+    if (view !== 'landing') {
+      setView('landing');
+      // Wait for the view transition to finish before scrolling
+      setTimeout(() => {
+        document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -34,10 +47,25 @@ const App: React.FC = () => {
               </div>
               <span className="text-xl font-bold text-slate-900 tracking-tight">ContractClarity AI</span>
             </button>
-            <div className="hidden md:flex space-x-6">
-              <button className="text-slate-600 hover:text-blue-700 font-medium transition-colors">How it works</button>
-              <button className="text-slate-600 hover:text-blue-700 font-medium transition-colors">Safety</button>
-              <button onClick={handleStartAnalysis} className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium">Get Started</button>
+            <div className="hidden md:flex space-x-6 items-center">
+              <button 
+                onClick={() => handleNavToSection('how-it-works')}
+                className="text-slate-600 hover:text-blue-700 font-medium transition-colors"
+              >
+                How it works
+              </button>
+              <button 
+                onClick={() => handleNavToSection('safety')}
+                className="text-slate-600 hover:text-blue-700 font-medium transition-colors"
+              >
+                Safety
+              </button>
+              <button 
+                onClick={handleStartAnalysis} 
+                className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium ml-2"
+              >
+                Get Started
+              </button>
             </div>
           </div>
         </div>
@@ -71,7 +99,7 @@ const App: React.FC = () => {
             © 2024 ContractClarity AI. Not legal advice. Use for informational purposes only.
           </p>
           <div className="mt-4 flex justify-center space-x-4 text-xs text-slate-400">
-            <a href="#" className="hover:text-slate-600">Privacy Policy</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavToSection('safety'); }} className="hover:text-slate-600">Privacy Policy</a>
             <a href="#" className="hover:text-slate-600">Terms of Service</a>
             <a href="#" className="hover:text-slate-600">Contact Support</a>
           </div>
